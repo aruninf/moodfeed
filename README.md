@@ -18,9 +18,10 @@ It does not change Meta's ranking. Nothing can, from outside. See the design doc
 
 ## Status
 
-**Design phase.** No code yet. The Phase 1 contract is:
+**Design phase.** No code yet.
 
-📄 [`docs/superpowers/specs/2026-11-16-moodfeed-design.md`](docs/superpowers/specs/2026-11-16-moodfeed-design.md)
+- 🧠 [The original idea and the problem](docs/original-idea.md) — why this exists, with diagrams
+- 📄 [The Phase 1 contract](docs/superpowers/specs/2026-11-16-moodfeed-design.md) — what gets built, what doesn't
 
 ## Planned stack
 
