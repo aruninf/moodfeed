@@ -24,7 +24,9 @@ It does not change Meta's ranking. Nothing can, from outside. See the design doc
 
 ## Planned stack
 
-Flutter 3.47 · Dart 3 · Riverpod · local JSON storage (no database, no backend, no `INTERNET` permission) · one small Kotlin platform channel for usage-access events.
+Flutter 3.47 · Dart 3 · Riverpod · local JSON storage (no database, no backend, no `INTERNET` permission) · one opt-in foreground service and a ~60-line Kotlin channel that reports which app is in the foreground.
+
+Android 8+ (minSdk 26). Phase 1 ships as a signed APK, not a Play release.
 
 ## Not in the MVP
 
