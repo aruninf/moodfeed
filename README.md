@@ -22,6 +22,9 @@ It does not change Meta's ranking. Nothing can, from outside. See the design doc
 
 - 🧠 [The original idea and the problem](docs/original-idea.md) — why this exists, with diagrams
 - 📄 [The Phase 1 contract](docs/superpowers/specs/2026-11-16-moodfeed-design.md) — what gets built, what doesn't
+- 📣 [Reaching out](docs/reach-out.md) — the launch copy, the targets, the sequence
+
+**Want to test it?** Android 8+. [Open an issue titled "tester"](https://github.com/aruninf/moodfeed/issues/new?title=tester&body=Android%20version%3A%20%0ADevice%3A%20%0AThe%20moment%20I%27d%20want%20this%3A%20) and you'll get the APK when Phase 1 lands.
 
 ## Planned stack
 
