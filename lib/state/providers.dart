@@ -4,6 +4,7 @@ import '../data/store.dart';
 import '../domain/resolver.dart';
 import '../models.dart';
 import '../platform/gate.dart';
+import '../platform/pack_bridge.dart';
 import '../platform/usage_channel.dart';
 
 /// Overridden in `main()` once `SharedPreferences` has resolved.
@@ -36,8 +37,10 @@ final activeStateProvider = Provider<ActiveState>((ref) {
   );
 });
 
-/// Replaced by the platform check in Task 11.
-final packInstalledProvider = FutureProvider<bool>((ref) async => false);
+final packInstalledProvider =
+    FutureProvider<bool>((ref) => const MoodFeedPlatform().isPackInstalled());
+
+final packBridgeProvider = Provider<PackBridge>((ref) => const PackBridge());
 
 final usageAccessProvider =
     FutureProvider<bool>((ref) => const MoodFeedPlatform().hasUsageAccess());

@@ -24,7 +24,7 @@ class _MoodFeedAppState extends ConsumerState<MoodFeedApp>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _syncGate());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _sync());
   }
 
   @override
@@ -35,11 +35,19 @@ class _MoodFeedAppState extends ConsumerState<MoodFeedApp>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) _syncGate();
+    if (state == AppLifecycleState.resumed) _sync();
   }
 
   /// The gate reads the mode from the store, so it only needs a nudge when the
   /// mode, the settings or a capability changes — not every clock tick.
+  Future<void> _sync() async {
+    await _syncGate();
+    await ref.read(packBridgeProvider).push(
+          ref.read(dataProvider),
+          DateTime.now(),
+        );
+  }
+
   Future<void> _syncGate() async {
     final gate = ref.read(gateProvider);
     final data = ref.read(dataProvider);
@@ -56,7 +64,7 @@ class _MoodFeedAppState extends ConsumerState<MoodFeedApp>
 
   @override
   Widget build(BuildContext context) {
-    ref.listen(dataProvider, (_, _) => _syncGate());
+    ref.listen(dataProvider, (_, _) => _sync());
     ref.listen(
       activeStateProvider.select((s) => (s.baseProfile.id, s.protection != null)),
       (_, _) => _syncGate(),

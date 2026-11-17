@@ -6,6 +6,8 @@ import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Bundle
 import android.os.Process
 import android.provider.Settings
 import io.flutter.embedding.engine.FlutterEngine
@@ -71,8 +73,25 @@ class MoodFeedPlugin(private val context: Context) {
         false
     }
 
-    /// Task 11 replaces this with the ContentProvider call.
-    private fun pushTimeline(json: String?): Boolean = false
+    /// Silent when the pack is absent or signed with another key: a missing
+    /// provider must never crash MoodFeed.
+    private fun pushTimeline(json: String?): Boolean {
+        if (json == null) return false
+        return try {
+            val bundle = Bundle().apply { putString("json", json) }
+            context.contentResolver.call(
+                Uri.parse("content://$PACK_PACKAGE.state"),
+                "set_state",
+                null,
+                bundle
+            )
+            true
+        } catch (e: SecurityException) {
+            false
+        } catch (e: IllegalArgumentException) {
+            false
+        }
+    }
 
     companion object {
         const val CHANNEL = "com.moodfeed/platform"
