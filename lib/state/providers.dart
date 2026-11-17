@@ -37,6 +37,9 @@ final activeStateProvider = Provider<ActiveState>((ref) {
 /// Replaced by the platform check in Task 11.
 final packInstalledProvider = FutureProvider<bool>((ref) async => false);
 
+/// Replaced by the platform check in Task 10.
+final usageAccessProvider = FutureProvider<bool>((ref) async => true);
+
 class DataNotifier extends Notifier<MoodData> {
   @override
   MoodData build() => ref.read(initialDataProvider);

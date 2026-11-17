@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'ui/home_screen.dart';
 import 'ui/profiles_screen.dart';
 import 'ui/schedule_screen.dart';
+import 'ui/settings_screen.dart';
 
 class MoodFeedApp extends ConsumerStatefulWidget {
   const MoodFeedApp({super.key});
@@ -37,6 +38,7 @@ class _MoodFeedAppState extends ConsumerState<MoodFeedApp> {
           0 => const HomeScreen(),
           1 => const ProfilesScreen(),
           2 => const ScheduleScreen(),
+          3 => const SettingsScreen(),
           _ => Center(child: Text(_titles[_index])),
         },
         bottomNavigationBar: NavigationBar(
