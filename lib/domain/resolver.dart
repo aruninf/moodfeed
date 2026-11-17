@@ -86,12 +86,29 @@ DateTime? _nextChangeAt(
   }
 
   for (final s in schedules.where((s) => s.enabled)) {
-    for (var day = 0; day < 8; day++) {
+    for (var day = 0; day < 9; day++) {
       final date = DateTime(now.year, now.month, now.day + day);
-      consider(DateTime(date.year, date.month, date.day,
-          s.startMinute ~/ 60, s.startMinute % 60));
-      consider(DateTime(date.year, date.month, date.day,
-          s.endMinute ~/ 60, s.endMinute % 60));
+      final previousWeekday =
+          date.weekday == DateTime.monday ? DateTime.sunday : date.weekday - 1;
+
+      if (s.startMinute < s.endMinute) {
+        if (s.daysOfWeek.contains(date.weekday)) {
+          consider(DateTime(date.year, date.month, date.day,
+              s.startMinute ~/ 60, s.startMinute % 60));
+          consider(DateTime(date.year, date.month, date.day,
+              s.endMinute ~/ 60, s.endMinute % 60));
+        }
+      } else if (s.startMinute > s.endMinute) {
+        // The window opens on an active day and closes on the following one.
+        if (s.daysOfWeek.contains(date.weekday)) {
+          consider(DateTime(date.year, date.month, date.day,
+              s.startMinute ~/ 60, s.startMinute % 60));
+        }
+        if (s.daysOfWeek.contains(previousWeekday)) {
+          consider(DateTime(date.year, date.month, date.day,
+              s.endMinute ~/ 60, s.endMinute % 60));
+        }
+      }
     }
   }
   consider(pin?.expiresAt);
