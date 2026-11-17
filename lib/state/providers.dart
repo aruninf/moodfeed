@@ -1,0 +1,49 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../data/store.dart';
+import '../domain/resolver.dart';
+import '../models.dart';
+
+/// Overridden in `main()` once `SharedPreferences` has resolved.
+final storeProvider = Provider<Store>(
+  (ref) => throw UnimplementedError('storeProvider must be overridden'),
+);
+
+/// The document loaded before the first frame, so the app never flashes a
+/// default mode while the real one is being read.
+final initialDataProvider = Provider<MoodData>((ref) => MoodData.defaults());
+
+final dataProvider = NotifierProvider<DataNotifier, MoodData>(DataNotifier.new);
+
+/// One tick per second. The active state is derived from it, never stored.
+final clockProvider = StreamProvider<DateTime>(
+  (ref) => Stream.periodic(const Duration(seconds: 1), (_) => DateTime.now()),
+);
+
+/// The single read of the resolver. Everything else consumes this.
+final activeStateProvider = Provider<ActiveState>((ref) {
+  final data = ref.watch(dataProvider);
+  final now = ref.watch(clockProvider).value ?? DateTime.now();
+  return resolveActiveState(
+    now: now,
+    profiles: data.profiles,
+    schedules: data.schedules,
+    defaultProfileId: data.settings.defaultProfileId,
+    pin: data.pin,
+    protection: data.protection,
+  );
+});
+
+/// Replaced by the platform check in Task 11.
+final packInstalledProvider = FutureProvider<bool>((ref) async => false);
+
+class DataNotifier extends Notifier<MoodData> {
+  @override
+  MoodData build() => ref.read(initialDataProvider);
+
+  Future<void> update(MoodData Function(MoodData) change) async {
+    final next = change(state);
+    state = next;
+    await ref.read(storeProvider).save(next);
+  }
+}
