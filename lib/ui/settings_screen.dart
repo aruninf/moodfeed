@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models.dart';
+import '../platform/usage_channel.dart';
 import '../state/providers.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -47,8 +48,10 @@ class SettingsScreen extends ConsumerWidget {
           ),
           trailing: usageAccess == false
               ? TextButton(
-                  // Task 10 deep-links to the system usage-access screen.
-                  onPressed: () {},
+                  onPressed: () async {
+                    await const MoodFeedPlatform().openUsageAccessSettings();
+                    ref.invalidate(usageAccessProvider);
+                  },
                   child: const Text('Grant'),
                 )
               : null,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'state/providers.dart';
 import 'ui/home_screen.dart';
 import 'ui/profiles_screen.dart';
 import 'ui/schedule_screen.dart';
@@ -13,15 +14,56 @@ class MoodFeedApp extends ConsumerStatefulWidget {
   ConsumerState<MoodFeedApp> createState() => _MoodFeedAppState();
 }
 
-class _MoodFeedAppState extends ConsumerState<MoodFeedApp> {
+class _MoodFeedAppState extends ConsumerState<MoodFeedApp>
+    with WidgetsBindingObserver {
   int _index = 0;
 
-  // shortcut: real screens arrive in Tasks 5-9, placeholders keep the shell
-  // runnable meanwhile.
   static const _titles = ['MoodFeed', 'Modes', 'Schedule', 'Settings'];
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _syncGate());
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _syncGate();
+  }
+
+  /// The gate reads the mode from the store, so it only needs a nudge when the
+  /// mode, the settings or a capability changes — not every clock tick.
+  Future<void> _syncGate() async {
+    final gate = ref.read(gateProvider);
+    final data = ref.read(dataProvider);
+    final active = ref.read(activeStateProvider);
+    await gate.sync(
+      enabled: data.settings.gateEnabled,
+      packInstalled: await ref.read(packInstalledProvider.future),
+      usageAccess: await ref.read(usageAccessProvider.future),
+      modeName: active.baseProfile.name,
+      profileId: active.baseProfile.id,
+      protecting: active.protection != null,
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
+    ref.listen(dataProvider, (_, _) => _syncGate());
+    ref.listen(
+      activeStateProvider.select((s) => (s.baseProfile.id, s.protection != null)),
+      (_, _) => _syncGate(),
+    );
+    ref.listen(packInstalledProvider, (_, _) => _syncGate());
+    ref.listen(usageAccessProvider, (_, _) => _syncGate());
+
     return MaterialApp(
       title: 'MoodFeed',
       themeMode: ThemeMode.dark,
@@ -38,8 +80,7 @@ class _MoodFeedAppState extends ConsumerState<MoodFeedApp> {
           0 => const HomeScreen(),
           1 => const ProfilesScreen(),
           2 => const ScheduleScreen(),
-          3 => const SettingsScreen(),
-          _ => Center(child: Text(_titles[_index])),
+          _ => const SettingsScreen(),
         },
         bottomNavigationBar: NavigationBar(
           selectedIndex: _index,

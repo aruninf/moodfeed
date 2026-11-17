@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/store.dart';
 import '../domain/resolver.dart';
 import '../models.dart';
+import '../platform/gate.dart';
+import '../platform/usage_channel.dart';
 
 /// Overridden in `main()` once `SharedPreferences` has resolved.
 final storeProvider = Provider<Store>(
@@ -37,8 +39,10 @@ final activeStateProvider = Provider<ActiveState>((ref) {
 /// Replaced by the platform check in Task 11.
 final packInstalledProvider = FutureProvider<bool>((ref) async => false);
 
-/// Replaced by the platform check in Task 10.
-final usageAccessProvider = FutureProvider<bool>((ref) async => true);
+final usageAccessProvider =
+    FutureProvider<bool>((ref) => const MoodFeedPlatform().hasUsageAccess());
+
+final gateProvider = Provider<Gate>((ref) => Gate(ref.watch(storeProvider).prefs));
 
 class DataNotifier extends Notifier<MoodData> {
   @override

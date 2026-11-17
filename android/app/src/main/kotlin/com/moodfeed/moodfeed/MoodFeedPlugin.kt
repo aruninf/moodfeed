@@ -1,0 +1,89 @@
+package com.moodfeed.moodfeed
+
+import android.app.AppOpsManager
+import android.app.usage.UsageEvents
+import android.app.usage.UsageStatsManager
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Process
+import android.provider.Settings
+import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.plugin.common.MethodChannel
+
+/// The only bridge between Dart and Android. Deliberately small: it answers
+/// questions the framework cannot, and nothing else.
+class MoodFeedPlugin(private val context: Context) {
+
+    fun handle(method: String, json: String?, result: MethodChannel.Result) {
+        when (method) {
+            "foregroundPackage" -> result.success(foregroundPackage())
+            "hasUsageAccess" -> result.success(hasUsageAccess())
+            "openUsageAccessSettings" -> {
+                context.startActivity(
+                    Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                )
+                result.success(null)
+            }
+            "closeForegroundApp" -> {
+                context.startActivity(
+                    Intent(Intent.ACTION_MAIN)
+                        .addCategory(Intent.CATEGORY_HOME)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                )
+                result.success(null)
+            }
+            "isPackInstalled" -> result.success(isPackInstalled())
+            "pushTimeline" -> result.success(pushTimeline(json))
+            else -> result.notImplemented()
+        }
+    }
+
+    private fun foregroundPackage(): String? {
+        val manager = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+        val now = System.currentTimeMillis()
+        val events = manager.queryEvents(now - 10_000, now)
+        val event = UsageEvents.Event()
+        var last: String? = null
+        while (events.hasNextEvent()) {
+            events.getNextEvent(event)
+            if (event.eventType == UsageEvents.Event.ACTIVITY_RESUMED) {
+                last = event.packageName
+            }
+        }
+        return last
+    }
+
+    private fun hasUsageAccess(): Boolean {
+        val ops = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
+        return ops.checkOpNoThrow(
+            AppOpsManager.OPSTR_GET_USAGE_STATS,
+            Process.myUid(),
+            context.packageName
+        ) == AppOpsManager.MODE_ALLOWED
+    }
+
+    private fun isPackInstalled(): Boolean = try {
+        context.packageManager.getPackageInfo(PACK_PACKAGE, 0)
+        true
+    } catch (e: PackageManager.NameNotFoundException) {
+        false
+    }
+
+    /// Task 11 replaces this with the ContentProvider call.
+    private fun pushTimeline(json: String?): Boolean = false
+
+    companion object {
+        const val CHANNEL = "com.moodfeed/platform"
+        const val PACK_PACKAGE = "com.instagram.android.moodfeed"
+
+        fun register(engine: FlutterEngine, context: Context) {
+            val plugin = MoodFeedPlugin(context.applicationContext)
+            MethodChannel(engine.dartExecutor.binaryMessenger, CHANNEL)
+                .setMethodCallHandler { call, result ->
+                    plugin.handle(call.method, call.argument<String>("json"), result)
+                }
+        }
+    }
+}

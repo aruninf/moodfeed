@@ -251,6 +251,8 @@ class Store {
 
   final SharedPreferences _prefs;
 
+  SharedPreferences get prefs => _prefs;
+
   Future<MoodData> load() async {
     final raw = _prefs.getString(key);
     if (raw == null) return MoodData.defaults();
