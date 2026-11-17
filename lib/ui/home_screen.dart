@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models.dart';
 import '../state/providers.dart';
+import 'protection_sheet.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -54,8 +55,7 @@ class HomeScreen extends ConsumerWidget {
         ],
         const SizedBox(height: 24),
         FilledButton(
-          // Task 8 replaces this with showProtectionSheet.
-          onPressed: () {},
+          onPressed: () => showProtectionSheet(context),
           child: const Text('Protect my peace'),
         ),
         const SizedBox(height: 32),
