@@ -50,6 +50,24 @@ class Profile {
   final Map<Surface, Level> surfaces;
   final bool followingOnly;
   final bool isDefault;
+
+  Profile copyWith({
+    String? name,
+    Map<Category, Level>? categoryLevels,
+    Map<Surface, Level>? surfaces,
+    bool? followingOnly,
+    bool? isDefault,
+  }) =>
+      Profile(
+        id: id,
+        name: name ?? this.name,
+        icon: icon,
+        color: color,
+        categoryLevels: categoryLevels ?? this.categoryLevels,
+        surfaces: surfaces ?? this.surfaces,
+        followingOnly: followingOnly ?? this.followingOnly,
+        isDefault: isDefault ?? this.isDefault,
+      );
 }
 
 class Schedule {
