@@ -98,17 +98,19 @@ Defaults: Work/Public = all `hide` except `stories`; Private = `feed: reduce`, `
       "effectiveAt": 1763409600000,
       "base": "relax",
       "reason": "scheduled",
-      "protection": { "expiresAt": 1763416800000, "softened": ["relationship_conflict", "breakup", "anger_aggression"] },
+      "protection": { "expiresAt": 1763416800000, "softened": ["relationshipConflict", "breakup", "angerAggression"] },
       "surfaces": { "feed": "reduce", "reels": "hide", "explore": "hide", "stories": "allow", "suggested": "hide", "ads": "hide", "notes": "allow", "instants": "allow", "threadsButton": "allow" },
       "followingOnly": true,
-      "filterCategories": ["relationship_conflict", "breakup", "anger_aggression"]
+      "filterCategories": ["relationshipConflict", "breakup", "angerAggression"]
     },
     { "effectiveAt": 1763416800000, "base": "relax", "reason": "scheduled", "protection": null, "surfaces": { "...": "..." }, "followingOnly": true, "filterCategories": [] }
   ]
 }
 ```
 
-`surfaces` uses the same three level names as the Dart enum — `allow`, `reduce`, `hide`.
+`surfaces` uses the same three level names as the Dart enum — `allow`, `reduce`, `hide`. Every
+enum value in the payload is the Dart `name` (so `relationshipConflict`, not
+`relationship_conflict`); one spelling, both sides.
 `filterCategories` is the resolved set from §3.8; it is empty when the mode hides no category and no
 protection is active. The pack stores the string verbatim in its own `SharedPreferences`
 (`moodfeed_state`) and, on every response-filter call and every app resume, applies the **last state

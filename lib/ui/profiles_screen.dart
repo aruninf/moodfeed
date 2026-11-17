@@ -18,7 +18,10 @@ class ProfilesScreen extends ConsumerWidget {
         for (final profile in profiles)
           Card(
             child: ListTile(
-              leading: Icon(IconData(profile.icon, fontFamily: 'MaterialIcons')),
+              leading: Text(
+                String.fromCharCode(profile.icon),
+                style: const TextStyle(fontFamily: 'MaterialIcons', fontSize: 24),
+              ),
               title: Text(profile.name),
               subtitle: Text(_summary(profile)),
               trailing: profile.isDefault ? const Text('Default') : null,
