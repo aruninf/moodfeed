@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'ui/home_screen.dart';
+
 class MoodFeedApp extends ConsumerStatefulWidget {
   const MoodFeedApp({super.key});
 
@@ -29,7 +31,10 @@ class _MoodFeedAppState extends ConsumerState<MoodFeedApp> {
       ),
       home: Scaffold(
         appBar: AppBar(title: Text(_titles[_index])),
-        body: Center(child: Text(_titles[_index])),
+        body: switch (_index) {
+          0 => const HomeScreen(),
+          _ => Center(child: Text(_titles[_index])),
+        },
         bottomNavigationBar: NavigationBar(
           selectedIndex: _index,
           onDestinationSelected: (value) => setState(() => _index = value),
