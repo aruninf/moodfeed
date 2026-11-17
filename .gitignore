@@ -7,7 +7,6 @@ build/
 *.iml
 .flutter-plugins
 .flutter-plugins-dependencies
-pubspec.lock
 
 # Android
 .gradle/
@@ -28,3 +27,6 @@ DerivedData/
 .idea/
 .vscode/
 .DS_Store
+
+# Reference clone of the patcher we fork from (Plan 2 Task 1)
+FeurStagram/
