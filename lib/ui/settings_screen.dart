@@ -14,12 +14,14 @@ class SettingsScreen extends ConsumerWidget {
     final settings = data.settings;
     final packInstalled = ref.watch(packInstalledProvider).value ?? false;
     final usageAccess = ref.watch(usageAccessProvider).value;
+    final active = ref.watch(activeStateProvider);
 
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
         ListTile(
           title: const Text('Default mode'),
+          subtitle: Text('Applies everywhere: ${active.baseProfile.name} is active'),
           trailing: DropdownButton<String>(
             value: settings.defaultProfileId,
             items: [
@@ -39,6 +41,12 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               ),
         ),
+        SwitchListTile(
+          title: const Text('Test mode (no cooldown)'),
+          subtitle: const Text('Fires reminder on every Instagram open instead of once per 90m'),
+          value: ref.watch(testModeProvider),
+          onChanged: (value) => ref.read(testModeProvider.notifier).toggle(value),
+        ),
         ListTile(
           title: const Text('Usage access'),
           subtitle: Text(
@@ -46,15 +54,19 @@ class SettingsScreen extends ConsumerWidget {
                 ? 'Off — MoodFeed cannot tell when Instagram opens.'
                 : 'On — MoodFeed can see which app came to the front.',
           ),
+          onTap: () => ref.invalidate(usageAccessProvider),
           trailing: usageAccess == false
               ? TextButton(
                   onPressed: () async {
                     await const MoodFeedPlatform().openUsageAccessSettings();
-                    ref.invalidate(usageAccessProvider);
                   },
                   child: const Text('Grant'),
                 )
               : null,
+        ),
+        ListTile(
+          title: const Text('MoodFeed pack'),
+          subtitle: Text(packInstalled ? 'Installed' : 'Not installed'),
         ),
         const Divider(),
         Padding(
@@ -93,11 +105,6 @@ class SettingsScreen extends ConsumerWidget {
               ),
         ),
         const Divider(),
-        ListTile(
-          title: const Text('MoodFeed pack'),
-          subtitle: Text(packInstalled ? 'Installed' : 'Not installed'),
-        ),
-        const Divider(),
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Text(
@@ -111,8 +118,14 @@ class SettingsScreen extends ConsumerWidget {
 
   void _setDefault(WidgetRef ref, String? id) {
     if (id == null) return;
+    final now = DateTime.now();
     ref.read(dataProvider.notifier).update(
           (d) => d.copyWith(
+            pin: Pin(
+              profileId: id,
+              startedAt: now,
+              expiresAt: null,
+            ),
             profiles: [
               for (final p in d.profiles) p.copyWith(isDefault: p.id == id),
             ],

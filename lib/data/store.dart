@@ -125,7 +125,14 @@ class MoodData {
           name: 'Work',
           icon: 0xe0be,
           color: 0xff4c6ef5,
-          categoryLevels: {},
+          categoryLevels: {
+            Category.romantic: Level.hide,
+            Category.suggestive: Level.hide,
+            Category.relationshipConflict: Level.hide,
+            Category.breakup: Level.hide,
+            Category.angerAggression: Level.hide,
+            Category.comedy: Level.reduce,
+          },
           surfaces: allHidden,
           followingOnly: false,
           isDefault: false,
@@ -135,7 +142,13 @@ class MoodData {
           name: 'Public',
           icon: 0xe57e,
           color: 0xff12b886,
-          categoryLevels: {},
+          categoryLevels: {
+            Category.suggestive: Level.hide,
+            Category.romantic: Level.reduce,
+            Category.relationshipConflict: Level.hide,
+            Category.breakup: Level.hide,
+            Category.angerAggression: Level.hide,
+          },
           surfaces: allHidden,
           followingOnly: false,
           isDefault: false,
@@ -145,7 +158,11 @@ class MoodData {
           name: 'Private',
           icon: 0xe32e,
           color: 0xfff76707,
-          categoryLevels: {},
+          categoryLevels: {
+            Category.angerAggression: Level.hide,
+            Category.relationshipConflict: Level.reduce,
+            Category.breakup: Level.reduce,
+          },
           surfaces: {
             Surface.feed: Level.reduce,
             Surface.explore: Level.hide,
@@ -158,7 +175,12 @@ class MoodData {
           name: 'Relax',
           icon: 0xe226,
           color: 0xffae3ec9,
-          categoryLevels: {},
+          categoryLevels: {
+            Category.relationshipConflict: Level.hide,
+            Category.breakup: Level.hide,
+            Category.angerAggression: Level.hide,
+            Category.suggestive: Level.reduce,
+          },
           surfaces: {
             Surface.reels: Level.hide,
             Surface.explore: Level.hide,
@@ -230,8 +252,19 @@ class MoodData {
   /// document can never wipe the user's profiles.
   factory MoodData.fromJson(Map<String, dynamic> json) {
     final fallback = defaults();
+    final defaultProfilesById = {for (final p in fallback.profiles) p.id: p};
+    final rawProfiles = _list(json['profiles'], _profileFromJson);
+    final profiles = rawProfiles == null
+        ? fallback.profiles
+        : [
+            for (final p in rawProfiles)
+              p.categoryLevels.isEmpty && defaultProfilesById.containsKey(p.id)
+                  ? p.copyWith(categoryLevels: defaultProfilesById[p.id]!.categoryLevels)
+                  : p,
+          ];
+
     return MoodData(
-      profiles: _list(json['profiles'], _profileFromJson) ?? fallback.profiles,
+      profiles: profiles,
       schedules: _list(json['schedules'], _scheduleFromJson) ?? fallback.schedules,
       pin: _one(json['pin'], _pinFromJson),
       protection: _one(json['protection'], _protectionFromJson),

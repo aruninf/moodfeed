@@ -41,6 +41,8 @@ class _MoodFeedAppState extends ConsumerState<MoodFeedApp>
   /// The gate reads the mode from the store, so it only needs a nudge when the
   /// mode, the settings or a capability changes — not every clock tick.
   Future<void> _sync() async {
+    ref.invalidate(usageAccessProvider);
+    ref.invalidate(packInstalledProvider);
     await _syncGate();
     await ref.read(packBridgeProvider).push(
           ref.read(dataProvider),

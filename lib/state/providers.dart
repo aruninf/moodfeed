@@ -47,6 +47,23 @@ final usageAccessProvider =
 
 final gateProvider = Provider<Gate>((ref) => Gate(ref.watch(storeProvider).prefs));
 
+class TestModeNotifier extends Notifier<bool> {
+  @override
+  bool build() {
+    final prefs = ref.watch(storeProvider).prefs;
+    return prefs.getBool('moodfeed.gate.test_mode') ?? false;
+  }
+
+  Future<void> toggle(bool value) async {
+    state = value;
+    await ref.read(storeProvider).prefs.setBool('moodfeed.gate.test_mode', value);
+    await ref.read(gateProvider).clearCooldown();
+  }
+}
+
+final testModeProvider =
+    NotifierProvider<TestModeNotifier, bool>(TestModeNotifier.new);
+
 class DataNotifier extends Notifier<MoodData> {
   @override
   MoodData build() => ref.read(initialDataProvider);

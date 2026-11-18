@@ -22,10 +22,18 @@ class MoodFeedPlugin(private val context: Context) {
             "foregroundPackage" -> result.success(foregroundPackage())
             "hasUsageAccess" -> result.success(hasUsageAccess())
             "openUsageAccessSettings" -> {
-                context.startActivity(
-                    Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                )
+                val intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS).apply {
+                    data = Uri.parse("package:${context.packageName}")
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                try {
+                    context.startActivity(intent)
+                } catch (e: Exception) {
+                    context.startActivity(
+                        Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    )
+                }
                 result.success(null)
             }
             "closeForegroundApp" -> {
@@ -59,11 +67,30 @@ class MoodFeedPlugin(private val context: Context) {
 
     private fun hasUsageAccess(): Boolean {
         val ops = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
-        return ops.checkOpNoThrow(
-            AppOpsManager.OPSTR_GET_USAGE_STATS,
-            Process.myUid(),
-            context.packageName
-        ) == AppOpsManager.MODE_ALLOWED
+        val mode = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            ops.unsafeCheckOpNoThrow(
+                AppOpsManager.OPSTR_GET_USAGE_STATS,
+                Process.myUid(),
+                context.packageName
+            )
+        } else {
+            @Suppress("DEPRECATION")
+            ops.checkOpNoThrow(
+                AppOpsManager.OPSTR_GET_USAGE_STATS,
+                Process.myUid(),
+                context.packageName
+            )
+        }
+        if (mode == AppOpsManager.MODE_ALLOWED) return true
+
+        return try {
+            val manager = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+            val now = System.currentTimeMillis()
+            val stats = manager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, now - 1000 * 60, now)
+            stats != null && stats.isNotEmpty()
+        } catch (e: Exception) {
+            false
+        }
     }
 
     private fun isPackInstalled(): Boolean = try {

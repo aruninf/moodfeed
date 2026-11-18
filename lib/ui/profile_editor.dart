@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../data/store.dart';
 import '../models.dart';
 import '../state/providers.dart';
 
@@ -45,7 +46,32 @@ class _ProfileEditorState extends ConsumerState<ProfileEditor> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(_profile.name)),
+      appBar: AppBar(
+        title: Text(_profile.name),
+        actions: [
+          IconButton(
+            tooltip: 'Reset to recommended defaults',
+            icon: const Icon(Icons.restart_alt),
+            onPressed: () {
+              final defaultProfile = MoodData.defaults().profiles.firstWhere(
+                    (p) => p.id == _profile.id,
+                    orElse: () => _profile,
+                  );
+              _persist(_profile.copyWith(
+                categoryLevels: defaultProfile.categoryLevels,
+                surfaces: defaultProfile.surfaces,
+                followingOnly: defaultProfile.followingOnly,
+              ));
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Reset ${_profile.name} to recommended defaults'),
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [

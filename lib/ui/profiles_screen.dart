@@ -38,9 +38,11 @@ class ProfilesScreen extends ConsumerWidget {
 }
 
 String _summary(Profile profile) {
-  final hidden = profile.surfaces.values.where((l) => l == Level.hide).length;
+  final hiddenSurfaces = profile.surfaces.values.where((l) => l == Level.hide).length;
+  final hiddenCategories = profile.categoryLevels.values.where((l) => l == Level.hide).length;
   final parts = <String>[
-    if (hidden > 0) '$hidden surfaces hidden',
+    if (hiddenSurfaces > 0) '$hiddenSurfaces surfaces hidden',
+    if (hiddenCategories > 0) '$hiddenCategories topics blocked',
     if (profile.followingOnly) 'following only',
   ];
   return parts.isEmpty ? 'Everything on' : parts.join(' · ');

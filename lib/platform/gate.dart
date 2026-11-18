@@ -116,7 +116,9 @@ class Gate {
 
     final notified = _prefs.getInt('moodfeed.gate.notified.$package') ?? 0;
     final now = DateTime.now();
-    if (now.millisecondsSinceEpoch - notified < _cooldown.inMilliseconds) {
+    final testMode = _prefs.getBool('moodfeed.gate.test_mode') ?? false;
+    final cooldownMs = testMode ? 5000 : _cooldown.inMilliseconds;
+    if (now.millisecondsSinceEpoch - notified < cooldownMs) {
       return;
     }
     await _prefs.setInt(
@@ -124,6 +126,20 @@ class Gate {
       now.millisecondsSinceEpoch,
     );
     await _showGate(package);
+  }
+
+  /// Clears the cooldown so the next Instagram open triggers the gate immediately.
+  Future<void> clearCooldown() async {
+    for (final pkg in watchedPackages) {
+      await _prefs.remove('moodfeed.gate.notified.$pkg');
+    }
+    await _prefs.remove(_lastKey);
+  }
+
+  /// Sends a one-off test reminder to verify notifications and buttons on device.
+  Future<void> showTestReminder() async {
+    await configure();
+    await _showGate('com.instagram.android');
   }
 
   Future<void> _showGate(String package) async {

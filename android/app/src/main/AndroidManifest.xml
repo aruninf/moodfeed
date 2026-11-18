@@ -53,6 +53,11 @@
 
          In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
     <queries>
+        <package android:name="com.instagram.android.moodfeed" />
+        <package android:name="com.instagram.android" />
+        <package android:name="com.instagram.android.lite" />
+        <package android:name="com.facebook.katana" />
+        <package android:name="com.facebook.katana.orca" />
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
